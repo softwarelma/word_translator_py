@@ -1,4 +1,4 @@
-# word_translator_py
+# word-translator-py
 
 A word translator using [WordReference](https://wordreference.com) for retrieving all information contained in the HTML
 document and returning data (encoded or decoded) as object, dict or json.

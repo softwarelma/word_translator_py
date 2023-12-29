@@ -267,7 +267,11 @@ def clean_html(html: str) -> str:
     html = html.replace('⇒', '')
     html = html.replace('ⓘ', '')
     # FROM Principal Translations
-    html = html[html.index('multipleEntriesContainer'):]
+    if "'articleWRD'" in html:
+        ind_begin = html.index("'articleWRD'")
+    else:
+        ind_begin = html.index('"articleWRD"')
+    html = html[ind_begin:]
     # TO <div id='collinsdiv'
     html = html[:html.index("<div id='collinsdiv'")]
     # REMOVE VOID A HREF

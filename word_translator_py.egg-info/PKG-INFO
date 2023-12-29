@@ -1,11 +1,11 @@
 Metadata-Version: 2.1
 Name: word-translator-py
-Version: 0.0.2
+Version: 0.0.3
 Author: Guillermo Rodolfo Ellison
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
-# word_translator_py
+# word-translator-py
 
 A word translator using [WordReference](https://wordreference.com) for retrieving all information contained in the HTML
 document and returning data (encoded or decoded) as object, dict or json.

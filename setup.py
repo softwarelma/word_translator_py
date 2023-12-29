@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # build with: py setup.py sdist
 setup(
     name='word-translator-py',
-    version='0.0.2',
+    version='0.0.3',
     author='Guillermo Rodolfo Ellison',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
