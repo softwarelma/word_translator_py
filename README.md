@@ -6,7 +6,7 @@ document and returning data (encoded or decoded) as object, dict or json.
 ## Installation
 
 ```console
-$ pip install word_translator_py
+$ pip install word-translator-py
 ```
 
 ## Usage
@@ -106,7 +106,7 @@ the encoded way when displaying data to users.
 ### All the ways of using a translation
 
 1. The default **object** is **encoded**, so in the example above the next sentence:
-   
+
    `translation.entry_sections[0].entry_words[0].from_examples[1]`
 
    will give you the following text:
