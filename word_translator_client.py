@@ -1,3 +1,5 @@
+__author__ = 'Guillermo Rodolfo Ellison'
+
 import json
 
 import requests
@@ -113,9 +115,6 @@ class Translation:
             'from_word': json_dumps(self.from_word),
             'entry_sections': [entry_section.to_dict_decoded() for entry_section in self.entry_sections]
         }
-
-    def to_dict_decoded_to_str(self) -> str:
-        return str(self.to_dict_decoded()).replace('\\\\', '\\')
 
     def to_json_decoded(self, indent: None | int | str = 2) -> str:
         return json.dumps(self.to_dict_encoded(), indent=indent)
@@ -515,11 +514,37 @@ def retrieve_translation(from_lang: str, to_lang: str, word: str, print_html: bo
     return translation
 
 
-def execution_example():
+def example_1_for_encoded_object():
     translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
-    translation = to_decoded_translation(translation)
-    print('translation =')  # TODO
     print(translation.entry_sections[0].entry_words[0].from_examples[1])
+    # will give you the following text: Vive en una casa de una sola planta con jardín y piscina.
 
 
-execution_example()
+def example_2_for_decoded_object():
+    translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
+    print(to_decoded_translation(translation).entry_sections[0].entry_words[0].from_examples[1])
+    # will give you the following text: Vive en una casa de una sola planta con jard\u00edn y piscina.
+
+
+def example_3_for_encoded_dict():
+    translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
+    print(translation.to_dict_encoded()['entry_sections'][0]['entry_words'][0]['from_examples'][1])
+    # will give you the following text: Vive en una casa de una sola planta con jardín y piscina.
+
+
+def example_4_for_decoded_dict():
+    translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
+    print(translation.to_dict_decoded()['entry_sections'][0]['entry_words'][0]['from_examples'][1])
+    # will give you the following text: Vive en una casa de una sola planta con jard\u00edn y piscina.
+
+
+def example_5_for_encoded_json():
+    translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
+    print(translation.to_json_encoded())
+    # will give you a text containing the following fragment: "Vive en una casa de una sola planta con jardín y piscina."
+
+
+def example_6_for_decoded_json():
+    translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
+    print(translation.to_json_decoded())
+    # will give you a text containing the following fragment: "Vive en una casa de una sola planta con jard\u00edn y piscina."

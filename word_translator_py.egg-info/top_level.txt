@@ -1,0 +1,2 @@
+setup
+word_translator_client

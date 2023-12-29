@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 setup(
     name='word_translator_py',
     version='0.0.1',
+    author='Guillermo Rodolfo Ellison',
     packages=find_packages(),
     py_modules=['setup', 'word_translator_client']
 )
