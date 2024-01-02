@@ -4,6 +4,12 @@ import json
 
 import requests
 
+CONST_POS2 = "'POS2'"
+CONST_TD1 = "<td"
+CONST_TD2 = "</td>"
+CONST_TO_WRD = "'ToWrd'"
+CONST_FR_WRD = "'FrWrd'"
+
 
 def encode_from_unicode_escape(s: str) -> str:
     while '\\u' in s:
@@ -244,40 +250,154 @@ def next_tag_content(html: str):
     return html, classes, data_phs, content
 
 
-def clean_tag_a(html: str):
+def clean_a_tag_once(html: str, start: int):
+    start_ori = start
     done = False
-    if '<a ' not in html:
-        # print("'<a ' not in html")
-        return done, html
-    ind0 = html.index('<a ')
+    if '<a ' not in html[start:]:
+        return done, html, start
+    ind0 = html.index('<a ', start)
     ind1 = html[ind0:].index('>') + ind0
-    if not html[ind1:].startswith('></a>'):
-        # print("not html[ind1:].startswith('></a>')")
-        return done, html
-    html = html[:ind0] + html[ind1 + 5:]
+    start = ind1 + 1
     done = True
-    return done, html
+    if not html[ind1:].startswith('></a>'):
+        return done, html, start
+    html = html[:ind0] + html[ind1 + 5:]
+    return done, html, start_ori
+
+
+def clean_a_tag_all(html: str) -> str:
+    start = 0
+    done, html, start = clean_a_tag_once(html, start)
+    while done:
+        done, html, start = clean_a_tag_once(html, start)
+    return html
+
+
+def clean_tag_once(html: str, start: int, end: int):
+    target0 = "<"
+    target1 = ">"
+    done = False
+    if target0 not in html[start:end]:
+        return done, html, start, end
+    ind0 = html.index(target0, start, end)
+    if target1 not in html[ind0:end]:
+        return done, html, start, end
+    ind1 = html[ind0:end].index(target1) + ind0
+    if ind0 > ind1:
+        return done, html, start, end
+    done = True
+    html = html[:ind0] + html[ind1 + 1:]
+    end -= (ind1 + 1 - ind0)
+    return done, html, start, end
+
+
+def clean_tag_all(html: str, start: int, end: int):
+    done, html, start, end = clean_tag_once(html, start, end)
+    while done:
+        done, html, start, end = clean_tag_once(html, start, end)
+    return html
+
+
+def clean_multi_target_once(html: str, start: int, target0: str, target1: str, target2: str):
+    done = False
+    if target0 not in html[start:]:
+        return done, html, start
+    done = True
+    ind0 = html.index(target0, start)
+    start = ind0 + len(target0)
+    if target1 not in html[start:]:
+        return done, html, start
+    ind1 = html[start:].index(target1) + start
+    if target2 not in html[start:]:
+        return done, html, start
+    ind2 = html[start:].index(target2) + start
+    if ind1 > ind2:
+        return done, html, start
+    html = clean_tag_all(html, start, ind1)
+    return done, html, start
+
+
+def find_new_start(html: str, start: int, target0: str, target1: str) -> int:
+    if target0 not in html[start:]:
+        return -1
+    ind0 = html.index(target0, start)
+    start = ind0 + len(target0)
+    if target1 not in html[start:]:
+        return -1
+    ind1 = html[start:].index(target1) + start
+    start = ind1 + len(target1)
+    return start
+
+
+def clean_context_once(html: str, start: int):
+    start = find_new_start(html, start, CONST_POS2, CONST_TD2)
+    if start < 0:
+        return False, html, start
+    return clean_multi_target_once(html, start, CONST_TD1, CONST_TD2, CONST_TD1)
+
+
+def clean_to_wrd_once(html: str, start: int):
+    return clean_multi_target_once(html, start, CONST_TO_WRD, CONST_POS2, CONST_TD2)
+
+
+def clean_fr_wrd_once(html: str, start: int):
+    return clean_multi_target_once(html, start, CONST_FR_WRD, CONST_POS2, CONST_TD2)
+
+
+def clean_context_all(html: str) -> str:
+    start = 0
+    done, html, start = clean_context_once(html, start)
+    while done:
+        done, html, start = clean_context_once(html, start)
+    return html
+
+
+def clean_to_wrd_all(html: str) -> str:
+    start = 0
+    done, html, start = clean_to_wrd_once(html, start)
+    while done:
+        done, html, start = clean_to_wrd_once(html, start)
+    return html
+
+
+def clean_fr_wrd_all(html: str) -> str:
+    start = 0
+    done, html, start = clean_fr_wrd_once(html, start)
+    while done:
+        done, html, start = clean_fr_wrd_once(html, start)
+    return html
 
 
 def clean_html(html: str) -> str:
     # GENERAL CLEAINING
     html = html + ' '
-    html = html.replace('  ', ' ').replace('&nbsp;', '')
+    html = html.replace('  ', ' ').replace('  ', ' ').replace('&nbsp;', '')
     html = html.replace('<strong>', '').replace('</strong>', '')
+    html = html.replace('<STRONG>', '').replace('</STRONG>', '')
+    html = html.replace('<TD', CONST_TD1).replace('</TD>', CONST_TD2)
+    html = html.replace(' =', '=').replace('= ', '=')
     html = html.replace('⇒', '')
     html = html.replace('ⓘ', '')
+    html = html.replace('"FrWrd"', CONST_FR_WRD)
+    html = html.replace('"ToWrd"', CONST_TO_WRD)
+    html = html.replace('"POS2"', CONST_POS2)
+    html = html.replace('"articleWRD"', "'articleWRD'")
+    html = html.replace('id="collinsdiv"', "id='collinsdiv'")
     # FROM Principal Translations
-    if "'articleWRD'" in html:
-        ind_begin = html.index("'articleWRD'")
-    else:
-        ind_begin = html.index('"articleWRD"')
+    ind_begin = html.index("'articleWRD'")
     html = html[ind_begin:]
     # TO <div id='collinsdiv'
-    html = html[:html.index("<div id='collinsdiv'")]
+    html = html[:html.index("id='collinsdiv'")]
     # REMOVE VOID A HREF
-    done, html = clean_tag_a(html)
-    while done:
-        done, html = clean_tag_a(html)
+    html = clean_a_tag_all(html)
+    # REMOVE INTERNAL FR WRD TAGS
+    html = clean_fr_wrd_all(html)
+    # REMOVE INTERNAL TO WRD TAGS
+    html = clean_to_wrd_all(html)
+    # REMOVE INTERNAL CONTEXT TAGS
+    html = clean_context_all(html)
+    # POST GENERAL CLEAINING
+    html = html.replace(' , ', ', ')
     return html
 
 
@@ -322,17 +442,17 @@ def retrieve_translation_pre_writing(translation: Translation, work: dict):
 
 def retrieve_translation_reading_1(work: dict):
     if 'wrtopsection' in work['classes_prev'] and 'sMainMeanings' in work['data_phs']:
-        work['section_type'] = 'principal'
-        work['penultimate_recognized'] = work['last_recognized']
-        work['last_recognized'] = 'section_type'
+        work['section_type'] = 'principal_translations'
     elif 'wrtopsection' in work['classes_prev'] and 'sAddTrans' in work['data_phs']:
-        work['section_type'] = 'additional'
-        work['penultimate_recognized'] = work['last_recognized']
-        work['last_recognized'] = 'section_type'
+        work['section_type'] = 'additional_translations'
     elif 'wrtopsection' in work['classes_prev'] and 'sCmpdForms' in work['data_phs']:
-        work['section_type'] = 'compound'
-        work['penultimate_recognized'] = work['last_recognized']
-        work['last_recognized'] = 'section_type'
+        work['section_type'] = 'compound_forms'
+    elif 'wrtopsection' in work['classes_prev'] and 'sPhrasalVerbs' in work['data_phs']:
+        work['section_type'] = 'phrasal_verbs'
+    else:
+        return
+    work['penultimate_recognized'] = work['last_recognized']
+    work['last_recognized'] = 'section_type'
 
 
 def retrieve_translation_reading_2(work: dict) -> bool:
@@ -393,6 +513,9 @@ def retrieve_translation_reading_3_b(work: dict):
           work['last_recognized'] == 'tone' and work['penultimate_recognized'] == 'from_grammar') \
             and len(work['classes_prev']) == 0:
         work['context'] = work['content']
+        if work['context'][:1] != '(' and '(' in work['context'] and work['context'][-1:] == ')':
+            work['tone'] = work['context'][:work['context'].index('(')].strip()
+            work['context'] = work['context'][work['context'].index('('):]
         work['penultimate_recognized'] = work['last_recognized']
         work['last_recognized'] = 'context'
 
@@ -510,10 +633,11 @@ def retrieve_translation(from_lang: str, to_lang: str, word: str, print_html: bo
                 continue
             retrieve_translation_writing(translation, work)
         work['html'], work['classes'], work['data_phs'], work['content'] = next_tag_content(work['html'])
-    if len(work['classes']) > 0:
+    if work['classes'] and len(work['classes']) > 0:
         work['classes_prev'].extend(work['classes'])
     if work['content'] and print_meta:
         print(f"""classes_prev_last="{work['classes_prev']}" """)
+        print(f"""data_phs_last="{work['data_phs']}" """)
         print(f"""content_last="{work['content']}" """)
     return translation
 

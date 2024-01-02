@@ -30,7 +30,7 @@ This is a fragment of the output:
   "from_word": "casa",
   "entry_sections": [
     {
-      "section_type": "principal",
+      "section_type": "principal_translations",
       "entry_words": [
         {
           "from_word": {
@@ -61,6 +61,9 @@ This is a fragment of the output:
         },
 ...
 ```
+
+The **section_type** attribute can be: principal_translations or additional_translations or compound_forms or
+phrasal_verbs. The other values are as shown on the website.
 
 ## The Translation class structure
 
