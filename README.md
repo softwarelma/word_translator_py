@@ -178,7 +178,8 @@ console_table: str = retrieve_console_table(translation)
 
 will give you a text with a formatted table like this:
 
-```console
+```python
+"""
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ principal_translations                                                  │
 ├──────┬────┬──┬────────────────────┬───────┬───┬─────────────────────────┤
@@ -189,7 +190,7 @@ will give you a text with a formatted table like this:
 │ Vive en una casa de una sola planta con jardín y piscina.               │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ He lives in a one-story house with a garden and a pool.                 │
-...
+"""
 ```
 
 See example_7_for_console_table() from module translation_as_console_table.
