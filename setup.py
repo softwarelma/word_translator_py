@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='word-translator-py',
-    version='0.0.7',
+    version='0.0.8',
     author='Guillermo Rodolfo Ellison',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
