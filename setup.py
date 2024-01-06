@@ -1,9 +1,16 @@
 from setuptools import setup, find_packages
 
-# build with: py setup.py sdist
+"""
+    Step 1. build with: py setup.py sdist
+    Step 2. for publishing to pypi:
+        twine upload --repository pypi dist/*
+        username: __token__
+        password: [PYPI_TOKEN]
+"""
+
 setup(
     name='word-translator-py',
-    version='0.0.5',
+    version='0.0.6',
     author='Guillermo Rodolfo Ellison',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',

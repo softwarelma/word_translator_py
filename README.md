@@ -178,7 +178,7 @@ console_table: str = retrieve_console_table(translation)
 
 will give you a text with a formatted table like this:
 
-```
+```console
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ principal_translations                                                  │
 ├──────┬────┬──┬────────────────────┬───────┬───┬─────────────────────────┤

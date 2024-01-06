@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: word-translator-py
-Version: 0.0.5
+Version: 0.0.6
 Author: Guillermo Rodolfo Ellison
 Description-Content-Type: text/markdown
 License-File: LICENSE
@@ -185,7 +185,7 @@ console_table: str = retrieve_console_table(translation)
 
 will give you a text with a formatted table like this:
 
-```
+```console
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ principal_translations                                                  │
 ├──────┬────┬──┬────────────────────┬───────┬───┬─────────────────────────┤
