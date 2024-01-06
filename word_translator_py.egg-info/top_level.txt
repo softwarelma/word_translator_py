@@ -1,3 +1,0 @@
-setup
-translation_as_console_table
-word_translator_client
