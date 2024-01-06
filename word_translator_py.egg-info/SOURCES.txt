@@ -1,8 +1,0 @@
-LICENSE
-README.md
-setup.py
-word_translator_client.py
-word_translator_py.egg-info/PKG-INFO
-word_translator_py.egg-info/SOURCES.txt
-word_translator_py.egg-info/dependency_links.txt
-word_translator_py.egg-info/top_level.txt

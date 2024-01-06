@@ -88,9 +88,14 @@ Translation
             └ to_examples []
 ```
 
+### All identified elements
+
+![All identified elements](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgksjyZuhvxuJaxemMiK0_O1xpi30qOwwJseq0CPpX-Z5TvtBVbofJ-TZ1hRDpfkfjQqQ&usqp=CAU)
+or https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true
+
 ## All usages
 
-### Retrieve
+### Retrieving
 
 You can retrieve a translation object this way:
 
@@ -162,13 +167,36 @@ the encoded way when displaying data to users.
    _"Vive en una casa de una sola planta con jard\u00edn y piscina."_
 
    See example_6_for_decoded_json().
+7. **Console table**, the next snippet:
+
+```python
+from word_translator_client import *
+from translation_as_console_table import retrieve_console_table
+
+translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
+console_table: str = retrieve_console_table(translation)
+```
+
+will give you a text with a formatted table like this:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ principal_translations                                                  │
+├──────┬────┬──┬────────────────────┬───────┬───┬─────────────────────────┤
+│ casa │ nf │  │ edificio, vivienda │ house │ n │                         │
+│      │    │  │                    │ place │ n │ informal                │
+├──────┴────┴──┴────────────────────┴───────┴───┴─────────────────────────┤
+│ Todas las casas de este barrio se construyeron según los mismos planos. │
+│ Vive en una casa de una sola planta con jardín y piscina.               │
+├─────────────────────────────────────────────────────────────────────────┤
+│ He lives in a one-story house with a garden and a pool.                 │
+...
+```
+
+See example_7_for_console_table() from module translation_as_console_table.
 
 ## Disclaimer
 
 This package was created by reading the HTML documents from [wordreference.com](https://wordreference.com). If you find
 some error please
 email us at softwarelma@gmail.com or email the author (Guillermo Rodolfo Ellison) at guillermoellison@gmail.com.
-
-### Release's dates
-
-First release: 2023-12-29. Last release: 2023-12-29.

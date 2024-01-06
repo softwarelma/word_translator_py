@@ -516,6 +516,9 @@ def retrieve_translation_reading_3_b(work: dict):
         if work['context'][:1] != '(' and '(' in work['context'] and work['context'][-1:] == ')':
             work['tone'] = work['context'][:work['context'].index('(')].strip()
             work['context'] = work['context'][work['context'].index('('):]
+        if ')(' in work['context'] and work['context'][:1] == '(' and work['context'][-1:] == ')':
+            work['note'] = work['context'][work['context'].index(')(') + 1:]
+            work['context'] = work['context'][:work['context'].index(')(') + 1]
         work['penultimate_recognized'] = work['last_recognized']
         work['last_recognized'] = 'context'
 
@@ -676,3 +679,5 @@ def example_6_for_decoded_json():
     translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
     print(translation.to_json_decoded())
     # will give you a text containing the following fragment: "Vive en una casa de una sola planta con jard\u00edn y piscina."
+
+# example_5_for_encoded_json()
