@@ -298,13 +298,14 @@ def clean_tag_all(html: str, start: int, end: int):
     return html
 
 
-def clean_multi_target_once(html: str, start: int, target0: str, target1: str, target2: str):
+def clean_multi_target_once(html: str, start: int, target0: str, target1: str, target2: str,
+                            include_targets: bool = False):
     done = False
     if target0 not in html[start:]:
         return done, html, start
     done = True
     ind0 = html.index(target0, start)
-    start = ind0 + len(target0)
+    start = ind0 if include_targets else ind0 + len(target0)
     if target1 not in html[start:]:
         return done, html, start
     ind1 = html[start:].index(target1) + start
@@ -313,7 +314,8 @@ def clean_multi_target_once(html: str, start: int, target0: str, target1: str, t
     ind2 = html[start:].index(target2) + start
     if ind1 > ind2:
         return done, html, start
-    html = clean_tag_all(html, start, ind1)
+    end = ind1 + len(target1) if include_targets else ind1
+    html = clean_tag_all(html, start, end)
     return done, html, start
 
 
@@ -329,11 +331,15 @@ def find_new_start(html: str, start: int, target0: str, target1: str) -> int:
     return start
 
 
-def clean_context_once(html: str, start: int):
+def clean_context_once_old(html: str, start: int):
     start = find_new_start(html, start, CONST_POS2, CONST_TD2)
     if start < 0:
         return False, html, start
     return clean_multi_target_once(html, start, CONST_TD1, CONST_TD2, CONST_TD1)
+
+
+def clean_context_once_new(html: str, start: int):
+    return clean_multi_target_once(html, start, '<span title=', '</span>', CONST_TD2, True)
 
 
 def clean_to_wrd_once(html: str, start: int):
@@ -344,11 +350,20 @@ def clean_fr_wrd_once(html: str, start: int):
     return clean_multi_target_once(html, start, CONST_FR_WRD, CONST_POS2, CONST_TD2)
 
 
-def clean_context_all(html: str) -> str:
+# deprecated
+def clean_context_all_old(html: str) -> str:
     start = 0
-    done, html, start = clean_context_once(html, start)
+    done, html, start = clean_context_once_old(html, start)
     while done:
-        done, html, start = clean_context_once(html, start)
+        done, html, start = clean_context_once_old(html, start)
+    return html
+
+
+def clean_context_all_new(html: str) -> str:
+    start = 0
+    done, html, start = clean_context_once_new(html, start)
+    while done:
+        done, html, start = clean_context_once_new(html, start)
     return html
 
 
@@ -395,7 +410,7 @@ def clean_html(html: str) -> str:
     # REMOVE INTERNAL TO WRD TAGS
     html = clean_to_wrd_all(html)
     # REMOVE INTERNAL CONTEXT TAGS
-    html = clean_context_all(html)
+    html = clean_context_all_new(html)
     # POST GENERAL CLEAINING
     html = html.replace(' , ', ', ')
     return html
@@ -410,6 +425,7 @@ def retrieve_translation_new_work(from_lang: str, to_lang: str, word: str, print
         'section_type': '',
         'from_word': '',
         'from_grammar': '',
+        'from_grammar_found': False,
         'to_word': '',
         'to_grammar': '',
         'tone': '',
@@ -459,7 +475,7 @@ def retrieve_translation_reading_2(work: dict) -> bool:
     if 'FrWrd' in work['classes_prev'] and 'ph' not in work['classes_prev']:
         work['from_word'] = work['content']
         work['to_word'] = ''
-        work['penultimate_recognized'] = work['last_recognized']
+        work['penultimate_recognized'] = 'to_example'
         work['last_recognized'] = 'from_word'
         return True
     elif 'ToWrd' in work['classes_prev'] and 'ph' not in work['classes_prev']:
@@ -476,14 +492,24 @@ def retrieve_translation_reading_2(work: dict) -> bool:
     return False
 
 
+def is_from_grammar_reading(work: dict) -> bool:
+    return 'POS2' in work['classes_prev'] and work['from_word']
+
+
+def is_content_or_from_grammar_reading(work: dict) -> bool:
+    return work['content'] or is_from_grammar_reading(work)
+
+
 def retrieve_translation_reading_3_a(work: dict) -> bool:
     if 'Fr2' in work['classes_prev'] and len(work['classes_prev']) == 1:
         work['tone'] = work['content']
         work['penultimate_recognized'] = work['last_recognized']
         work['last_recognized'] = 'tone'
         return True
-    elif 'POS2' in work['classes_prev'] and work['from_word']:
+    elif is_from_grammar_reading(work):
         work['from_grammar'] = work['content']
+        work['from_grammar'] = '' if work['from_grammar'] is None else work['from_grammar']
+        work['from_grammar_found'] = True
         work['penultimate_recognized'] = work['last_recognized']
         work['last_recognized'] = 'from_grammar'
         return True
@@ -579,22 +605,29 @@ def retrieve_translation_writing_1(translation: Translation, work: dict):
     if work['from_example']:
         if work['print_data']:
             print(f"    from_example={work['from_example']}")
+        if not len(translation.entry_sections[-1].entry_words):
+            print(f"from_example={work['from_example']}")
         entry_word: EntryWord = translation.entry_sections[-1].entry_words[-1]
         entry_word.from_examples.append(work['from_example'])
         work['from_example'] = ''
 
 
+def new_entry_word(translation: Translation, work: dict):
+    from_word_2: FromWord = FromWord(from_word=work['from_word'], from_grammar=work['from_grammar'])
+    entry_word: EntryWord = EntryWord(from_word=from_word_2, to_words=[], tone='', context='',
+                                      from_examples=[], to_examples=[])
+    translation.entry_sections[-1].entry_words.append(entry_word)
+    work['from_word'] = ''
+    work['from_grammar'] = ''
+    work['from_grammar_found'] = False
+
+
 def retrieve_translation_writing_2(translation: Translation, work: dict):
-    if work['from_grammar'] and work['from_word']:
+    if work['from_grammar_found'] and work['from_word']:
         if work['print_data']:
             print(f"    from_word={work['from_word']}")
             print(f"    from_grammar={work['from_grammar']}")
-        from_word_2: FromWord = FromWord(from_word=work['from_word'], from_grammar=work['from_grammar'])
-        entry_word: EntryWord = EntryWord(from_word=from_word_2, to_words=[], tone='', context='',
-                                          from_examples=[], to_examples=[])
-        translation.entry_sections[-1].entry_words.append(entry_word)
-        work['from_word'] = ''
-        work['from_grammar'] = ''
+        new_entry_word(translation, work)
     if work['to_grammar'] and work['to_word']:
         if work['note']:
             work['note'] = work['note'][1:-1]
@@ -603,7 +636,8 @@ def retrieve_translation_writing_2(translation: Translation, work: dict):
                 print(f"    note={work['note']}")
             print(f"    to_word={work['to_word']}")
             print(f"    to_grammar={work['to_grammar']}")
-        entry_word: EntryWord = translation.entry_sections[-1].entry_words[-1]
+        last_entry_section: EntrySection = translation.entry_sections[-1]
+        entry_word: EntryWord = last_entry_section.entry_words[-1]
         to_word_2: ToWord = ToWord(to_word=work['to_word'], to_grammar=work['to_grammar'], note=work['note'])
         entry_word.to_words.append(to_word_2)
         work['to_word'] = ''
@@ -627,7 +661,7 @@ def retrieve_translation(from_lang: str, to_lang: str, word: str, print_html: bo
         retrieve_translation_pre_writing(translation, work)
         if len(work['classes']) > 0:
             work['classes_prev'].extend(work['classes'])
-        if work['content']:
+        if is_content_or_from_grammar_reading(work):
             if print_meta:
                 print(f"""classes_prev="{work['classes_prev']}" """)
                 print(f"""data_phs="{work['data_phs']}" """)

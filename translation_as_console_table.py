@@ -175,8 +175,15 @@ def retrieve_console_table(translation: Translation) -> str:
 
 
 def example_7_for_console_table():
-    translation: Translation = retrieve_translation(from_lang='es', to_lang='en', word='casa')
+    translation: Translation = retrieve_translation(from_lang='en', to_lang='es', word='house')
+    console_table: str = retrieve_console_table(translation)
+    print(console_table)
+
+
+def example_8_for_console_table():
+    translation: Translation = retrieve_translation(from_lang='en', to_lang='it', word='after')
     console_table: str = retrieve_console_table(translation)
     print(console_table)
 
 # example_7_for_console_table()
+# example_8_for_console_table()

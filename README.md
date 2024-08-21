@@ -1,7 +1,7 @@
 # word-translator-py
 
-A word translator using [WordReference](https://wordreference.com) for retrieving all information contained in the HTML
-document and returning data (encoded or decoded) as object, dict or json.
+A word translator using [WordReference](https://wordreference.com) to retrieve all the information contained in the HTML
+document and return the data (encoded or decoded) as object, dict or json.
 
 ## Installation
 
@@ -63,7 +63,7 @@ This is a fragment of the output:
 ```
 
 The **section_type** attribute can be: principal_translations or additional_translations or compound_forms or
-phrasal_verbs. The other values are as shown on the website.
+phrasal_verbs. The other values are as shown on the wordreference website.
 
 ## The Translation class structure
 
@@ -96,7 +96,7 @@ Translation
 
 ### Retrieving
 
-You can retrieve a translation object this way:
+You can retrieve a wordreference translation object this way:
 
 ```python
 from word_translator_client import *
@@ -108,7 +108,7 @@ translation: Translation = retrieve_translation(
 ### Encoded vs decoded
 
 Remember **jardín** is _encoded_ and **jard\u00edn** is _decoded_. The software point of view is applied. Thus, prefer
-the encoded way when displaying data to users.
+the encoded way when displaying data to users (as in the wordreference website).
 
 ### All the ways of using a translation
 
@@ -180,10 +180,11 @@ will give you a text with a formatted table like this:
 
 ![Console table](https://github.com/softwarelma/word_translator_py/blob/main/console_table.jpg?raw=true)
 
+The spatial distribution is as shown on the wordreference website. 
 See example_7_for_console_table() from module translation_as_console_table.
 
 ## Disclaimer
 
-This package was created by reading the HTML documents from [wordreference.com](https://wordreference.com). If you find
-some error please
-email us at softwarelma@gmail.com or email the author (Guillermo Rodolfo Ellison) at guillermoellison@gmail.com.
+This package was created by reading the HTML documents from [wordreference.com](https://wordreference.com). 
+As wordreference could change the output, if you find some error please email us at softwarelma@gmail.com 
+or email the author (Guillermo Rodolfo Ellison) at guillermoellison@gmail.com.
